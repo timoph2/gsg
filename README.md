@@ -54,7 +54,7 @@ curl http://localhost:3000/api/classes
 - Class Name is unique and normalized to lowercase among its level.
 - Work contact numbers assumed to be exactly eight digits, no country prefix.
 - Each class requires one teacher, and a teacher can only belong to one class. A unique database constraint on `school_class.teacher_id` enforces this even with concurrent requests.
-- The database tables are named `teacher` and `school_class`; API endpoints remain `/api/teachers` and `/api/classes`.
+- The database tables are named `teacher` and `school_class`, API endpoints remain `/api/teachers` and `/api/classes`.
 
 
 
@@ -64,14 +64,15 @@ curl http://localhost:3000/api/classes
 -  Unexpected server errors are not returned verbatim, but kept generic to not expose information to client
 
 - Rate limited to prevent malicious spamming
-- Authentication and authorization are not implemented, if so would be done via short-lived JWT access tokens in memory for RBAC, and refresh tokens as a httpCookie.
+- Authentication and authorization are not implemented. If added, keep short-lived access tokens in memory and store refresh tokens in `HttpOnly`, `Secure`, `SameSite` cookies sent only over HTTPS. Enforce authorization on the server.
 
 
 
 ## API suggestions
 - To include Pagination, SKIP LIMIT if roughly under 1 million records, else use cursor pagination
-- If using express server, ratelimiter can be wrapped in middleware via app.use(rateLimitResponse) to avoid repetition
+- If the API uses Express, adapt the rate limiter as Express middleware and configure CORS with an allowlist of trusted frontend origins that need cross-origin access.
 - Depending on query patterns, table indexes can be added, such as for looking up all rows in `school_class` by level.
+- For Typescript frontend and backend, tRPC can be used for to share typed API contracts. 
 
 - Frontend caching is done via React Query, such as caching teacher list under ["teachers"] key, shared across pages while the app’s QueryClient remains mounted. The cache is considered fresh for 30 seconds (providers.tsx). During that time, navigating to a page that uses the same key can reuse the cached data.
 (After a teacher is added, the app invalidates ["teachers"], so the next use refreshes it. This is an in-memory cache; it doesn’t persist across a full page reload.)
