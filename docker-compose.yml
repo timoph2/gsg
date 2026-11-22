@@ -1,0 +1,16 @@
+services:
+  migrate:
+    build:
+      context: .
+      target: migrate
+    env_file:
+      - .env.local
+    profiles:
+      - migrate
+  app:
+    build:
+      context: .
+    env_file:
+      - .env.local
+    ports:
+      - "3000:3000"
